@@ -141,7 +141,7 @@ def set_end(survey_id, set_end=None):  # noqa: E501
     """
     if connexion.request.is_json:
         set_end = SetEnd.from_dict(connexion.request.get_json())  # noqa: E501
-        surveys[survey_id].published = set_end.end_date
+        surveys[survey_id].end = set_end.end_date
     return f'Date set to {set_end.end_date}'
 
 
@@ -159,5 +159,5 @@ def set_start(survey_id, set_start=None):  # noqa: E501
     """
     if connexion.request.is_json:
         set_start = SetStart.from_dict(connexion.request.get_json())  # noqa: E501
-        surveys[survey_id].published = set_start.start_date
+        surveys[survey_id].start = set_start.start_date
     return f'Date set to {set_start.start_date}'

@@ -77,8 +77,11 @@ def delete_survey(survey_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
-    surveys.pop(survey_id)
-    return f'Survey {survey_id} was deleted'
+    if surveys[survey_id]:
+        surveys.pop(survey_id)
+        return f'Survey {survey_id} was deleted'
+    else:
+        return 'The following survey doesn\'t exist'
 
 
 def get_question(survey_id, question_id):  # noqa: E501

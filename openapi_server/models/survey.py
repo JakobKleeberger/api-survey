@@ -34,10 +34,11 @@ class Survey(Model):
         }
 
         self._id = id
+        self.question_id_counter = 0
         self._name = name
         self.start = None
         self.end = None
-        self.questions = list()
+        self.questions = {}
         self.published = None
 
     @classmethod

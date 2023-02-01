@@ -14,7 +14,8 @@ from openapi_server.models.set_start import SetStart  # noqa: E501
 from openapi_server.models.survey import Survey  # noqa: E501
 from openapi_server import util
 
-surveys = list()
+surveys = {}
+id_counter = 0
 
 def create_question(survey_id, create_question=None):  # noqa: E501
     """Create Question
@@ -30,8 +31,10 @@ def create_question(survey_id, create_question=None):  # noqa: E501
     """
     if connexion.request.is_json:
         create_question = CreateQuestion.from_dict(connexion.request.get_json())  # noqa: E501
-        surveys.questions.append(Question(len(surveys[survey_id].questions), create_question.question, create_question.question_type, create_question.answers))
-    return f'{Question.to_dict()}'
+        question_id_counter = surveys[survey_id].question_id_counter
+        surveys[survey_id].questions[question_id_counter] = Question(question_id_counter, create_question.question, create_question.question_type, create_question.answers)
+
+    return f'{surveys[survey_id].questions}'
 
 
 def create_survey(create_survey=None):  # noqa: E501
@@ -44,11 +47,13 @@ def create_survey(create_survey=None):  # noqa: E501
 
     :rtype: Union[Survey, Tuple[Survey, int], Tuple[Survey, int, Dict[str, str]]
     """
+    global id_counter
+
     if connexion.request.is_json:
         create_survey = CreateSurvey.from_dict(connexion.request.get_json())  # noqa: E501
-        id = len(surveys)
-        surveys.append(Survey(id, create_survey.name))
-        return id
+        surveys[id_counter] = Survey(id_counter, create_survey.name)
+        id_counter += 1
+        return id_counter - 1
 
 
 def delete_question(survey_id, question_id):  # noqa: E501
@@ -77,6 +82,7 @@ def delete_survey(survey_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
+    print(survey_id)
     if surveys[survey_id]:
         surveys.pop(survey_id)
         return f'Survey {survey_id} was deleted'

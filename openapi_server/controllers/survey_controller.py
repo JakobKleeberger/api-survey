@@ -14,6 +14,7 @@ from openapi_server.models.set_start import SetStart  # noqa: E501
 from openapi_server.models.survey import Survey  # noqa: E501
 from openapi_server import util
 
+surveys = list()
 
 def create_question(survey_id, create_question=None):  # noqa: E501
     """Create Question
@@ -44,7 +45,9 @@ def create_survey(create_survey=None):  # noqa: E501
     """
     if connexion.request.is_json:
         create_survey = CreateSurvey.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+        id = len(surveys)
+        surveys.append(Survey(id, create_survey.name))
+        return id
 
 
 def delete_question(survey_id, question_id):  # noqa: E501
@@ -59,6 +62,7 @@ def delete_question(survey_id, question_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
+
     return 'do some magic!'
 
 
@@ -72,6 +76,7 @@ def delete_survey(survey_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
+    surveys.pop(survey_id)
     return 'do some magic!'
 
 
@@ -117,6 +122,7 @@ def publish_survey(survey_id, publish=None):  # noqa: E501
     """
     if connexion.request.is_json:
         publish = Publish.from_dict(connexion.request.get_json())  # noqa: E501
+        surveys[survey_id].published = True
     return 'do some magic!'
 
 
@@ -134,6 +140,7 @@ def set_end(survey_id, set_end=None):  # noqa: E501
     """
     if connexion.request.is_json:
         set_end = SetEnd.from_dict(connexion.request.get_json())  # noqa: E501
+        surveys[survey_id].published = set_end.end_date
     return 'do some magic!'
 
 
@@ -151,4 +158,5 @@ def set_start(survey_id, set_start=None):  # noqa: E501
     """
     if connexion.request.is_json:
         set_start = SetStart.from_dict(connexion.request.get_json())  # noqa: E501
+        surveys[survey_id].published = set_start.start_date
     return 'do some magic!'

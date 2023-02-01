@@ -35,6 +35,10 @@ class Survey(Model):
 
         self._id = id
         self._name = name
+        self.start = None
+        self.end = None
+        self.questions = list()
+        self.published = None
 
     @classmethod
     def from_dict(cls, dikt) -> 'Survey':

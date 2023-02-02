@@ -13,10 +13,9 @@ from openapi_server.models.set_end import SetEnd  # noqa: E501
 from openapi_server.models.set_start import SetStart  # noqa: E501
 from openapi_server.models.survey import Survey  # noqa: E501
 from openapi_server import util
-from openapi_server.interfaces.db_controller import mongo_adapter as ma
+from openapi_server.interfaces.db_controller import mongo_adapter
 
-surveys = {}
-id_counter = 0
+ma = mongo_adapter('localhost', 27017)
 
 def create_question(survey_id, create_question=None):  # noqa: E501
     """Create Question
@@ -32,9 +31,9 @@ def create_question(survey_id, create_question=None):  # noqa: E501
     """
     if connexion.request.is_json:
         create_question = CreateQuestion.from_dict(connexion.request.get_json())  # noqa: E501
-        ma.insertQuestion(survey_id, Question(create_question.question, create_question.question_type, create_question.answers))
+        qid = ma.insertQuestion(survey_id, Question(create_question.question, create_question.question_type, create_question.answers))
 
-    return f'{surveys[survey_id].questions}'
+    return str(ma.getQuestion(survey_id, qid))
 
 
 def create_survey(create_survey=None):  # noqa: E501
@@ -47,11 +46,9 @@ def create_survey(create_survey=None):  # noqa: E501
 
     :rtype: Union[Survey, Tuple[Survey, int], Tuple[Survey, int, Dict[str, str]]
     """
-    global id_counter
-
     if connexion.request.is_json:
         create_survey = CreateSurvey.from_dict(connexion.request.get_json())  # noqa: E501
-        return ma.insertSurvey(Survey(create_survey.name))
+        return ma.insertSurvey(Survey(name=create_survey.name))
 
 
 def delete_question(survey_id, question_id):  # noqa: E501
@@ -96,7 +93,7 @@ def get_question(survey_id, question_id):  # noqa: E501
 
     :rtype: Union[Question, Tuple[Question, int], Tuple[Question, int, Dict[str, str]]
     """
-    return ma.getQuestion(survey_id, question_id)
+    return str(ma.getQuestion(survey_id, question_id))
 
 
 def list_questions(survey_id):  # noqa: E501
@@ -109,7 +106,7 @@ def list_questions(survey_id):  # noqa: E501
 
     :rtype: Union[Questions, Tuple[Questions, int], Tuple[Questions, int, Dict[str, str]]
     """
-    return ma.getQuestions()
+    return ' '.join(str(e) for e in list(ma.getQuestions(survey_id)))
 
 
 def publish_survey(survey_id, publish=None):  # noqa: E501

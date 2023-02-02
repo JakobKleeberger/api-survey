@@ -15,7 +15,7 @@ class Question(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, question=None, question_type=None, answers=None):  # noqa: E501
+    def __init__(self, question=None, question_type=None, answers=None):  # noqa: E501
         """Question - a model defined in OpenAPI
 
         :param id: The id of this Question.  # noqa: E501
@@ -28,20 +28,17 @@ class Question(Model):
         :type answers: str
         """
         self.openapi_types = {
-            'id': int,
             'question': str,
             'question_type': str,
             'answers': str
         }
 
         self.attribute_map = {
-            'id': 'id',
             'question': 'question',
             'question_type': 'question-type',
             'answers': 'answers'
         }
 
-        self._id = id
         self._question = question
         self._question_type = question_type
         self._answers = answers

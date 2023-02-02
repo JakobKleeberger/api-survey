@@ -13,6 +13,7 @@ from openapi_server.models.set_end import SetEnd  # noqa: E501
 from openapi_server.models.set_start import SetStart  # noqa: E501
 from openapi_server.models.survey import Survey  # noqa: E501
 from openapi_server import util
+from openapi_server.interfaces.db_controller import mongo_adapter as ma
 
 surveys = {}
 id_counter = 0
@@ -31,8 +32,7 @@ def create_question(survey_id, create_question=None):  # noqa: E501
     """
     if connexion.request.is_json:
         create_question = CreateQuestion.from_dict(connexion.request.get_json())  # noqa: E501
-        question_id_counter = surveys[survey_id].question_id_counter
-        surveys[survey_id].questions[question_id_counter] = Question(question_id_counter, create_question.question, create_question.question_type, create_question.answers)
+        ma.insertQuestion(survey_id, Question(create_question.question, create_question.question_type, create_question.answers))
 
     return f'{surveys[survey_id].questions}'
 
@@ -51,9 +51,7 @@ def create_survey(create_survey=None):  # noqa: E501
 
     if connexion.request.is_json:
         create_survey = CreateSurvey.from_dict(connexion.request.get_json())  # noqa: E501
-        surveys[id_counter] = Survey(id_counter, create_survey.name)
-        id_counter += 1
-        return id_counter - 1
+        return ma.insertSurvey(Survey(create_survey.name))
 
 
 def delete_question(survey_id, question_id):  # noqa: E501
@@ -68,7 +66,7 @@ def delete_question(survey_id, question_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
-    surveys[survey_id].questions.pop(question_id)
+    ma.deleteQuestion(survey_id, question_id)
     return f'Question {question_id} was deleted from survey {survey_id}'
 
 
@@ -82,12 +80,8 @@ def delete_survey(survey_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
-    print(survey_id)
-    if surveys[survey_id]:
-        surveys.pop(survey_id)
-        return f'Survey {survey_id} was deleted'
-    else:
-        return 'The following survey doesn\'t exist'
+    ma.deleteSurvey(survey_id)
+    return f'Survey {survey_id} was deleted'
 
 
 def get_question(survey_id, question_id):  # noqa: E501
@@ -102,7 +96,7 @@ def get_question(survey_id, question_id):  # noqa: E501
 
     :rtype: Union[Question, Tuple[Question, int], Tuple[Question, int, Dict[str, str]]
     """
-    return surveys[survey_id].questions[question_id]
+    return ma.getQuestion(survey_id, question_id)
 
 
 def list_questions(survey_id):  # noqa: E501
@@ -115,7 +109,7 @@ def list_questions(survey_id):  # noqa: E501
 
     :rtype: Union[Questions, Tuple[Questions, int], Tuple[Questions, int, Dict[str, str]]
     """
-    return surveys[survey_id].questions
+    return ma.getQuestions()
 
 
 def publish_survey(survey_id, publish=None):  # noqa: E501
@@ -132,7 +126,7 @@ def publish_survey(survey_id, publish=None):  # noqa: E501
     """
     if connexion.request.is_json:
         publish = Publish.from_dict(connexion.request.get_json())  # noqa: E501
-        surveys[survey_id].published = True
+        ma.updateSurvey(survey_id, 'published', True)
     return f'Survey {survey_id} is published'
 
 
@@ -150,7 +144,7 @@ def set_end(survey_id, set_end=None):  # noqa: E501
     """
     if connexion.request.is_json:
         set_end = SetEnd.from_dict(connexion.request.get_json())  # noqa: E501
-        surveys[survey_id].end = set_end.end_date
+        ma.updateSurvey(survey_id, 'end_date', set_end.end_date)
     return f'Date set to {set_end.end_date}'
 
 
@@ -168,5 +162,5 @@ def set_start(survey_id, set_start=None):  # noqa: E501
     """
     if connexion.request.is_json:
         set_start = SetStart.from_dict(connexion.request.get_json())  # noqa: E501
-        surveys[survey_id].start = set_start.start_date
+        ma.updateSurvey(survey_id, 'start_date', set_start.start_date)
     return f'Date set to {set_start.start_date}'

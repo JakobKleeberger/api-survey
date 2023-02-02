@@ -8,7 +8,7 @@ from bson import ObjectId
 
 class mongo_adapter():
     def __init__(self):
-        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+        myclient = pymongo.MongoClient("localhost", 27017)
         db_name = "api-survey"
         sur_col = "surveys"
         que_col = "questions"
@@ -19,7 +19,7 @@ class mongo_adapter():
     def insertSurvey(self, survey):
         sur_dict = {"name": survey.name, "start_date": survey.start, "end_date": survey.end, "published": survey.published}
         ins = self.sur_col.insert_one(sur_dict)
-        return ins.__inserted_id
+        return ins.inserted_id
 
     def getSurvey(self, id):
         query = {"_id": ObjectId(id)}
@@ -30,14 +30,14 @@ class mongo_adapter():
         newvalues = { "$set": { key: value } }
         return self.sur_col.update_one(query, newvalues)
 
-    def dropSurvey(self, id):
+    def deleteSurvey(self, id):
         query = {"_id": ObjectId(id)}
         return self.sur_col.delete_one(query)
 
     def insertQuestion(self, surv_id,  question):
         sur_dict = {"surv_id": surv_id, "question": question.question, "question-type": question.question_type, "answers": question.answers}
         ins = self.sur_col.insert_one(sur_dict)
-        return ins.__inserted_id
+        return ins.inserted_id
 
     def getQuestions(self, id):
         query = {"surv_id": id}
